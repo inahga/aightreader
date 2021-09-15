@@ -1,7 +1,6 @@
 package device
 
 import (
-	"context"
 	"fmt"
 
 	"gitlab.com/gomidi/midi"
@@ -9,41 +8,39 @@ import (
 	"gitlab.com/gomidi/rtmididrv"
 )
 
-type MIDIDevice struct {
-	in              midi.In
-	noteOn, noteOff func(key uint8)
-	debug           bool
-}
-
-var midiDriver midi.Driver
-
 func init() {
 	drv, err := rtmididrv.New()
 	if err != nil {
 		panic(err)
 	}
-	midiDriver = drv
+	drivers = append(drivers, &midiDriver{Driver: drv})
 }
 
-func ListMIDIDevices() ([]midi.In, error) {
-	return midiDriver.Ins()
+type midiDriver struct {
+	midi.Driver
 }
 
-func NewMIDIDevice(dev int, debug bool) (Device, error) {
-	ins, err := midiDriver.Ins()
+func (m *midiDriver) ListDevices() (devices []Device, err error) {
+	ins, err := m.Driver.Ins()
 	if err != nil {
-		return nil, err
+		return
 	}
-	in := ins[dev]
-
-	if err := in.Open(); err != nil {
-		return nil, err
+	for _, in := range ins {
+		devices = append(devices, &midiDevice{in: in})
 	}
-
-	return &MIDIDevice{in: in}, nil
+	return
 }
 
-func (m *MIDIDevice) Listen(_ context.Context) error {
+type midiDevice struct {
+	in              midi.In
+	noteOn, noteOff func(key uint8)
+	debug           bool
+}
+
+func (m *midiDevice) Listen() error {
+	if err := m.in.Open(); err != nil {
+		return err
+	}
 	opts := []func(r *reader.Reader){
 		reader.NoteOn(func(_ *reader.Position, _, key, _ uint8) {
 			m.noteOn(key)
@@ -63,14 +60,22 @@ func (m *MIDIDevice) Listen(_ context.Context) error {
 	return nil
 }
 
-func (m *MIDIDevice) NoteOn(fn func(key uint8)) {
+func (m *midiDevice) Description() string {
+	return m.in.String()
+}
+
+func (m *midiDevice) NoteOn(fn func(key uint8)) {
 	m.noteOn = fn
 }
 
-func (m *MIDIDevice) NoteOff(fn func(key uint8)) {
+func (m *midiDevice) NoteOff(fn func(key uint8)) {
 	m.noteOff = fn
 }
 
-func (m *MIDIDevice) Close() error {
+func (m *midiDevice) Close() error {
 	return m.in.Close()
+}
+
+func (m *midiDevice) SetDebug(b bool) {
+	m.debug = b
 }
