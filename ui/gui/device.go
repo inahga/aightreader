@@ -6,7 +6,7 @@ import (
 	"github.com/inahga/aightreader/device"
 )
 
-func (t *GUI) ChooseDevice(devices []device.Device) device.Device {
+func (t *GUI) ChooseDevice() device.Device {
 	devices, err := device.ListDevices()
 	if err != nil {
 		panic(fmt.Errorf("bug: cannot list available devices: %w", err))

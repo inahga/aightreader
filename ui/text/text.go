@@ -32,7 +32,7 @@ func (t *TextUI) Main() {
 	select {}
 }
 
-func (t *TextUI) ChooseDevice(devices []device.Device) device.Device {
+func (t *TextUI) ChooseDevice() device.Device {
 	devices, err := device.ListDevices()
 	if err != nil {
 		panic(fmt.Errorf("bug: cannot list available devices: %w", err))
