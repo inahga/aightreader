@@ -12,8 +12,10 @@ type UI interface {
 	Main()
 
 	// ChooseDevice presents devices and requests the user chooses one. It blocks
-	// until a choice is made.
-	ChooseDevice([]device.Device) device.Device
+	// until a choice is made. If no devices are available, it will block indefinitely
+	// until one is available. The UI should periodically recheck for new devices
+	// and rerender itself as necessary.
+	ChooseDevice() device.Device
 	// ChooseDeviceError raises an error on the ChooseDevice screen. It does not
 	// block.
 	ChooseDeviceError(error)

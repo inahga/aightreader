@@ -1,9 +1,20 @@
 package gui
 
-import "github.com/inahga/aightreader/device"
+import (
+	"fmt"
+
+	"github.com/inahga/aightreader/device"
+)
 
 func (t *GUI) ChooseDevice(devices []device.Device) device.Device {
-	return nil
+	devices, err := device.ListDevices()
+	if err != nil {
+		panic(fmt.Errorf("bug: cannot list available devices: %w", err))
+	} else if len(devices) == 0 {
+		fmt.Println("no available devices!")
+		select {}
+	}
+	return devices[0]
 }
 
 func (t *GUI) ChooseDeviceError(err error) {

@@ -33,6 +33,12 @@ func (t *TextUI) Main() {
 }
 
 func (t *TextUI) ChooseDevice(devices []device.Device) device.Device {
+	devices, err := device.ListDevices()
+	if err != nil {
+		panic(fmt.Errorf("bug: cannot list available devices: %w", err))
+	} else if len(devices) == 0 {
+		fmt.Fprintln(t.out, "no available devices!")
+	}
 	for index, device := range devices {
 		fmt.Fprintf(t.out, "%d: %s\n", index, device.Description())
 	}

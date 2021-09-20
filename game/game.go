@@ -106,14 +106,8 @@ func (s *state) chooseDevice() {
 	//   - Only one device is available, should automatically choose that one
 	//     - But how to surface errors if there is one?
 	//   - User wants to remember device choice from the last session
-
-	devices, err := device.ListDevices()
-	if err != nil {
-		panic(fmt.Errorf("bug: cannot list available devices: %w", err))
-	}
-
 	for {
-		dev := s.u.ChooseDevice(devices)
+		dev := s.u.ChooseDevice()
 		if err := s.setDevice(dev); err != nil {
 			s.u.ChooseDeviceError(err)
 		} else {
