@@ -37,7 +37,12 @@ func drawWindow(w *app.Window) error {
 		switch e := e.(type) {
 		case system.FrameEvent:
 			gtx := layout.NewContext(&ops, e)
-			staff := GrandStaff{}
+			staff := GrandStaff{
+				StaffLineWeight: 2,
+				StaffLines:      31,
+				TopStaffLine:    9,
+				BottomStaffLine: 24,
+			}
 			staff.Layout(gtx)
 			e.Frame(gtx.Ops)
 		}
