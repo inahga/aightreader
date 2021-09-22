@@ -13,75 +13,75 @@ var (
 	// Leland is the open source MuseScore font, distributed under the OFL-1.1
 	// license. See https://github.com/MuseScoreFonts/Leland
 	Leland *opentype.Font
-)
 
-const (
-	lelandLeftBrace  = '\uE000'
-	lelandTrebleClef = '\uE050'
-	lelandBassClef   = '\uE062'
+	lelandSymbolMap = map[string]rune{
+		"leftBrace":  '\uE000',
+		"trebleClef": '\uE050',
+		"bassClef":   '\uE062',
 
-	lelandTimeSignatureZero  = '\uE080'
-	lelandTimeSignatureOne   = '\uE081'
-	lelandTimeSignatureTwo   = '\uE082'
-	lelandTimeSignatureThree = '\uE083'
-	lelandTimeSignatureFour  = '\uE084'
-	lelandTimeSignatureFive  = '\uE085'
-	lelandTimeSignatureSix   = '\uE086'
-	lelandTimeSignatureSeven = '\uE087'
-	lelandTimeSignatureEight = '\uE088'
-	lelandTimeSignatureNine  = '\uE089'
+		"timeSignatureZero":  '\uE080',
+		"timeSignatureOne":   '\uE081',
+		"timeSignatureTwo":   '\uE082',
+		"timeSignatureThree": '\uE083',
+		"timeSignatureFour":  '\uE084',
+		"timeSignatureFive":  '\uE085',
+		"timeSignatureSix":   '\uE086',
+		"timeSignatureSeven": '\uE087',
+		"timeSignatureEight": '\uE088',
+		"timeSignatureNine":  '\uE089',
 
-	lelandWholeNote             = '\uE1D2'
-	lelandUpwardHalfNote        = '\uE1D3'
-	lelandDownwardHalfNote      = '\uE1D4'
-	lelandUpwardQuarterNote     = '\uE1D5'
-	lelandDownwardQuarterNote   = '\uE1D6'
-	lelandUpwardEighthNote      = '\uE1D7'
-	lelandDownwardEighthNote    = '\uE1D8'
-	lelandUpwardSixteenthNote   = '\uE1D9'
-	lelandDownwardSixteenthNote = '\uE1DA'
+		"wholeNote":             '\uE1D2',
+		"upwardHalfNote":        '\uE1D3',
+		"downwardHalfNote":      '\uE1D4',
+		"upwardQuarterNote":     '\uE1D5',
+		"downwardQuarterNote":   '\uE1D6',
+		"upwardEighthNote":      '\uE1D7',
+		"downwardEighthNote":    '\uE1D8',
+		"upwardSixteenthNote":   '\uE1D9',
+		"downwardSixteenthNote": '\uE1DA',
 
-	lelandClimbingEighthTail    = '\uE220'
-	lelandClimbingSixteenthTail = '\uE221'
+		"climbingEighthTail":    '\uE220',
+		"climbingSixteenthTail": '\uE221',
 
-	lelandFlatAccidental    = '\uE260'
-	lelandNaturalAccidental = '\uE261'
-	lelandSharpAccidental   = '\uE262'
+		"flatAccidental":    '\uE260',
+		"naturalAccidental": '\uE261',
+		"sharpAccidental":   '\uE262',
 
-	lelandWholeRest     = '\uE4E3'
-	lelandHalfRest      = '\uE4E4'
-	lelandQuarterRest   = '\uE4E5'
-	lelandEigthRest     = '\uE4E6'
-	lelandSixteenthRest = '\uE4E7'
+		"wholeRest":     '\uE4E3',
+		"halfRest":      '\uE4E4',
+		"quarterRest":   '\uE4E5',
+		"eigthRest":     '\uE4E6',
+		"sixteenthRest": '\uE4E7',
 
-	lelandOttava      = '\uE512'
-	lelandOttavaBassa = '\uE513'
+		"ottava":      '\uE512',
+		"ottavaBassa": '\uE513',
 
-	lelandPiano      = '\uE520'
-	lelandForte      = '\uE522'
-	lelandPianissimo = '\uE52B'
-	lelandMezzoPiano = '\uE52C'
-	lelandMezzoForte = '\uE52D'
-	lelandFortissimo = '\uE52F'
+		"piano":      '\uE520',
+		"forte":      '\uE522',
+		"pianissimo": '\uE52B',
+		"mezzoPiano": '\uE52C',
+		"mezzoForte": '\uE52D',
+		"fortissimo": '\uE52F',
 
-	lelandTrill = '\uE566'
+		"trill": '\uE566',
 
-	lelandPedal        = '\uE650'
-	lelandReleasePedal = '\uE655'
+		"pedal":        '\uE650',
+		"releasePedal": '\uE655',
 
-	lelandFingerZero  = '\uE880'
-	lelandFingerOne   = '\uE881'
-	lelandFingerTwo   = '\uE882'
-	lelandFingerThree = '\uE883'
-	lelandFingerFour  = '\uE884'
-	lelandFingerFive  = '\uE885'
-	lelandFingerSix   = '\uE886'
-	lelandFingerSeven = '\uE887'
-	lelandFingerEight = '\uE888'
-	lelandFingerNine  = '\uE889'
+		"fingerZero":  '\uE880',
+		"fingerOne":   '\uE881',
+		"fingerTwo":   '\uE882',
+		"fingerThree": '\uE883',
+		"fingerFour":  '\uE884',
+		"fingerFive":  '\uE885',
+		"fingerSix":   '\uE886',
+		"fingerSeven": '\uE887',
+		"fingerEight": '\uE888',
+		"fingerNine":  '\uE889',
 
-	lelandFallingEighthTail    = '\uF40F'
-	lelandFallingSixteenthTail = '\uF412'
+		"fallingEighthTail":    '\uF40F',
+		"fallingSixteenthTail": '\uF412',
+	}
 )
 
 func init() {
@@ -89,5 +89,10 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	Leland = f
+	glyphFont := &glyphFont{
+		Name:      "leland",
+		Font:      f,
+		SymbolMap: lelandSymbolMap,
+	}
+	glyphFonts[glyphFont.Name] = glyphFont
 }

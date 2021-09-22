@@ -23,14 +23,14 @@ func (g *GUI) Start() error {
 		w := app.NewWindow(
 			app.Title("aightreader"),
 		)
-		if err := draw(w); err != nil {
+		if err := drawWindow(w); err != nil {
 			panic(err)
 		}
 	}()
 	return nil
 }
 
-func draw(w *app.Window) error {
+func drawWindow(w *app.Window) error {
 	var ops op.Ops
 
 	for e := range w.Events() {
