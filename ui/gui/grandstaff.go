@@ -78,8 +78,8 @@ func (g *GrandStaff) drawVerticalStaffLine(gtx C, offset, width int) {
 
 func (g *GrandStaff) drawClefs(gtx C) {
 	// placeholder offsets
-	g.drawGlyph(gtx, "trebleClef", image.Pt(15, (g.TopStaffLine-1)*g.staffLineHeight))
-	g.drawGlyph(gtx, "bassClef", image.Pt(15, (g.BottomStaffLine-5)*g.staffLineHeight))
+	g.drawGlyph(gtx, "trebleClef", image.Pt(15, (g.TopStaffLine+3)*g.staffLineHeight+(g.StaffLineWeight/2)))
+	g.drawGlyph(gtx, "bassClef", image.Pt(15, (g.BottomStaffLine-4)*g.staffLineHeight+(g.StaffLineWeight/2)))
 }
 
 func (g *GrandStaff) drawGlyph(gtx C, name string, point image.Point) {
@@ -88,7 +88,7 @@ func (g *GrandStaff) drawGlyph(gtx C, name string, point image.Point) {
 	mask := g.glyphStore.MustGetGlyphMask(name)
 	rect := image.Rect(0, 0, gtx.Constraints.Max.X, gtx.Constraints.Max.Y)
 	dst := image.NewRGBA(rect)
-	draw.DrawMask(dst, rect.Add(point), image.Black, image.Point{}, mask.mask, mask.maskp, draw.Over)
+	draw.DrawMask(dst, mask.dr.Add(point), image.Black, image.Point{}, mask.mask, mask.maskp, draw.Over)
 	paint.NewImageOp(dst).Add(gtx.Ops)
 	paint.PaintOp{}.Add(gtx.Ops)
 }
