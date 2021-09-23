@@ -1,6 +1,9 @@
 package gui
 
 import (
+	"image"
+	"image/draw"
+
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
@@ -33,16 +36,17 @@ func (g *GUI) Start() error {
 func drawWindow(w *app.Window) error {
 	var ops op.Ops
 
+	staff := GrandStaff{
+		StaffLineWeight: 1,
+		StaffLines:      31,
+		TopStaffLine:    9,
+		BottomStaffLine: 24,
+	}
+
 	for e := range w.Events() {
 		switch e := e.(type) {
 		case system.FrameEvent:
 			gtx := layout.NewContext(&ops, e)
-			staff := GrandStaff{
-				StaffLineWeight: 2,
-				StaffLines:      31,
-				TopStaffLine:    9,
-				BottomStaffLine: 24,
-			}
 			staff.Layout(gtx)
 			e.Frame(gtx.Ops)
 		}
@@ -52,4 +56,9 @@ func drawWindow(w *app.Window) error {
 
 func (g *GUI) Main() {
 	app.Main()
+}
+
+func canvas(gtx C) draw.Image {
+	c := gtx.Constraints
+	return image.NewRGBA(image.Rect(0, 0, c.Max.X, c.Max.Y))
 }

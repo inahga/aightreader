@@ -19,9 +19,10 @@ type (
 	}
 
 	glyphMask struct {
-		dr    image.Rectangle
-		mask  image.Image
-		maskp image.Point
+		dr      image.Rectangle
+		mask    image.Image
+		maskp   image.Point
+		advance fixed.Int26_6
 	}
 
 	glyphStore struct {
@@ -50,6 +51,14 @@ func newGlyphStore(font *glyphFont, size float64, dpi float64) (*glyphStore, err
 	}, nil
 }
 
+func mustNewGlyphStore(font *glyphFont, size float64, dpi float64) *glyphStore {
+	store, err := newGlyphStore(font, size, dpi)
+	if err != nil {
+		return nil
+	}
+	return store
+}
+
 func (g *glyphStore) GetGlyphMask(name string) (*glyphMask, error) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
@@ -63,12 +72,12 @@ func (g *glyphStore) GetGlyphMask(name string) (*glyphMask, error) {
 		return nil, fmt.Errorf("unregistered symbol %s", name)
 	}
 
-	dr, mask, maskp, _, ok := g.Face.Glyph(fixed.P(0, 0), r)
+	dr, mask, maskp, advance, ok := g.Face.Glyph(fixed.P(0, 0), r)
 	if !ok {
 		return nil, fmt.Errorf("unknown rune for symbol %s", name)
 	}
 
-	glyph := &glyphMask{dr: dr, mask: mask, maskp: maskp}
+	glyph := &glyphMask{dr: dr, mask: mask, maskp: maskp, advance: advance}
 	g.glyphs[name] = glyph
 	return glyph, nil
 }
