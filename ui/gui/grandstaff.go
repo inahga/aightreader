@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 
@@ -15,26 +16,36 @@ const (
 	bracePadding = 2
 )
 
-// GrandStaff is a Gio widget that renders the grand staff.
-type GrandStaff struct {
-	StaffLineWeight int // Thickness in pixels of staff lines
-	StaffLines      int // Number of staff and ledger lines to make space for.
-	TopStaffLine    int // Number of ledger lines before the top staff starts.
-	BottomStaffLine int // Number of ledger lines where the bottom staff ends.
+type (
 
-	GlyphStore      *glyphStore
-	LargeGlyphStore *glyphStore
-	leftOffset      int
-}
+	// GrandStaff is a Gio widget that renders the grand staff.
+	GrandStaff struct {
+		StaffLineWeight int // Thickness in pixels of staff lines
+		StaffLines      int // Number of staff and ledger lines to make space for.
+		TopStaffLine    int // Number of ledger lines before the top staff starts.
+		BottomStaffLine int // Number of ledger lines where the bottom staff ends.
+		TimeSignature
+
+		glyphStore      *glyphStore
+		largeGlyphStore *glyphStore
+		leftOffset      int
+	}
+
+	TimeSignature struct {
+		BeatsPerBar, BeatUnit int
+	}
+)
 
 func (g *GrandStaff) Layout(gtx C) D {
-	g.GlyphStore = mustNewGlyphStore(glyphFonts["leland"],
+	// Problem: these stores are recreated on every frame redraw!
+	g.glyphStore = mustNewGlyphStore(glyphFonts["leland"],
 		lelandMagicCoefficient*float64(g.staffLineHeight(gtx)), defaultDPI)
-	g.LargeGlyphStore = mustNewGlyphStore(glyphFonts["leland"], 1000, defaultDPI)
+	g.largeGlyphStore = mustNewGlyphStore(glyphFonts["leland"], 1000, defaultDPI)
 
 	g.leftOffset = g.drawLeftBrace(gtx)
 	g.drawStaffLines(gtx)
-	g.drawClefs(gtx)
+	g.leftOffset = g.drawClefs(gtx)
+	g.leftOffset = g.drawTimeSignature(gtx)
 	return D{Size: image.Point{X: gtx.Constraints.Max.X, Y: gtx.Constraints.Max.Y}}
 }
 
@@ -75,20 +86,43 @@ func (g *GrandStaff) drawVerticalStaffLine(gtx C, offset, width int) {
 	paint.PaintOp{}.Add(gtx.Ops)
 }
 
-func (g *GrandStaff) drawClefs(gtx C) {
-	// placeholder offsets
+// drawClefs draws the clefs at the current left offset, then returns the new
+// left offset.
+func (g *GrandStaff) drawClefs(gtx C) int {
+	offset := g.leftOffset + g.leftOffset/2
+
 	// Treble clef baseline should be aligned with G.
-	g.drawGlyph(gtx, "trebleClef", image.Pt(g.leftOffset+10,
+	t := g.drawGlyph(gtx, "trebleClef", image.Pt(offset,
 		(g.TopStaffLine+3)*g.staffLineHeight(gtx)+(g.StaffLineWeight/2)))
+
 	// Bass clef baseline should be aligned with F.
-	g.drawGlyph(gtx, "bassClef", image.Pt(g.leftOffset+10,
+	b := g.drawGlyph(gtx, "bassClef", image.Pt(offset,
 		(g.BottomStaffLine-4)*g.staffLineHeight(gtx)+(g.StaffLineWeight/2)))
+
+	if t > b {
+		return t
+	}
+	return b + offset
 }
 
+func (g *GrandStaff) drawTimeSignature(gtx C) int {
+	offset := g.leftOffset + g.leftOffset/5
+
+	num := fmt.Sprintf("timeSignature%d", g.TimeSignature.BeatsPerBar)
+	denom := fmt.Sprintf("timeSignature%d", g.TimeSignature.BeatUnit)
+
+	g.drawGlyph(gtx, num, image.Pt(offset, g.yOffset(gtx, g.TopStaffLine+1)))
+	g.drawGlyph(gtx, denom, image.Pt(offset, g.yOffset(gtx, g.TopStaffLine+3)))
+	g.drawGlyph(gtx, num, image.Pt(offset, g.yOffset(gtx, g.BottomStaffLine-4)))
+	g.drawGlyph(gtx, denom, image.Pt(offset, g.yOffset(gtx, g.BottomStaffLine-2)))
+	return 0
+}
+
+// drawGlyph returns the width of the drawn glyph.
 func (g *GrandStaff) drawGlyph(gtx C, name string, point image.Point) int {
 	defer op.Save(gtx.Ops).Load()
 
-	mask := g.GlyphStore.MustGetGlyphMask(name)
+	mask := g.glyphStore.MustGetGlyphMask(name)
 	dst := canvas(gtx)
 	draw.DrawMask(dst, mask.dr.Add(point), image.Black, image.Point{}, mask.mask, mask.maskp, draw.Over)
 	paint.NewImageOp(dst).Add(gtx.Ops)
@@ -96,6 +130,7 @@ func (g *GrandStaff) drawGlyph(gtx C, name string, point image.Point) int {
 	return mask.dr.Dx()
 }
 
+// drawLeftBrace returns the width of the drawn brace.
 func (g *GrandStaff) drawLeftBrace(gtx C) int {
 	defer op.Save(gtx.Ops).Load()
 	topOffset, bottomOffset := g.topOffset(gtx), g.bottomOffset(gtx)
@@ -103,7 +138,7 @@ func (g *GrandStaff) drawLeftBrace(gtx C) int {
 
 	// The font by default doesn't come with a large enough brace. Start with it
 	// very large, then scale it down.
-	mask := g.LargeGlyphStore.MustGetGlyphMask("leftBrace")
+	mask := g.largeGlyphStore.MustGetGlyphMask("leftBrace")
 	unmasked := image.NewRGBA(mask.dr)
 	draw.DrawMask(unmasked, mask.dr, image.Black, image.Point{}, mask.mask, mask.maskp, draw.Over)
 
@@ -137,4 +172,8 @@ func (g *GrandStaff) topOffset(gtx C) int {
 // bottomOffset returns the number of pixels until the bottom staff line is reached.
 func (g *GrandStaff) bottomOffset(gtx C) int {
 	return (g.BottomStaffLine-1)*g.staffLineHeight(gtx) + g.StaffLineWeight
+}
+
+func (g *GrandStaff) yOffset(gtx C, line int) int {
+	return line*g.staffLineHeight(gtx) + (g.StaffLineWeight / 2)
 }

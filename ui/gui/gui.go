@@ -41,6 +41,7 @@ func drawWindow(w *app.Window) error {
 		StaffLines:      31,
 		TopStaffLine:    9,
 		BottomStaffLine: 24,
+		TimeSignature:   TimeSignature{2, 4},
 	}
 
 	for e := range w.Events() {
