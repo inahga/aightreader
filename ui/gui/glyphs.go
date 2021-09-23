@@ -3,6 +3,7 @@ package gui
 import (
 	"fmt"
 	"image"
+	"image/draw"
 	"sync"
 
 	"golang.org/x/image/font"
@@ -77,7 +78,14 @@ func (g *glyphStore) GetGlyphMask(name string) (*glyphMask, error) {
 		return nil, fmt.Errorf("unknown rune for symbol %s", name)
 	}
 
-	glyph := &glyphMask{dr: dr, mask: mask, maskp: maskp, advance: advance}
+	// Copy mask since Face.Glyph doesn't guarantee that the underlying image won't
+	// be reused. This totally destroys performance when resizing window.
+	dim := dr.Max.Sub(dr.Min)
+	rect := image.Rect(0, 0, dim.X, dim.Y)
+	maskCopy := image.NewAlpha(rect)
+	draw.Draw(maskCopy, rect, mask, maskp, draw.Over)
+
+	glyph := &glyphMask{dr: dr, mask: maskCopy, maskp: maskp, advance: advance}
 	g.glyphs[name] = glyph
 	return glyph, nil
 }
