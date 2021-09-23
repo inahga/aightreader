@@ -17,7 +17,7 @@ var (
 	// lelandMagicCoefficient is the a coefficient that when multiplied by the
 	// width between staff lines, results in a size value that fits the whole
 	// note perfectly between the staff lines.
-	lelandMagicCoefficient float64 = 2.7
+	lelandMagicCoefficient float64 = .95
 
 	lelandSymbolMap = map[string]rune{
 		"leftBrace":  '\uE000',

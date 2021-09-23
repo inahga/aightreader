@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 
@@ -12,7 +11,7 @@ import (
 )
 
 const (
-	defaultDPI   = 100 // IDK what the correct value should be...
+	defaultDPI   = 300
 	bracePadding = 2
 )
 
@@ -79,12 +78,11 @@ func (g *GrandStaff) drawVerticalStaffLine(gtx C, offset, width int) {
 func (g *GrandStaff) drawClefs(gtx C) {
 	// placeholder offsets
 	// Treble clef baseline should be aligned with G.
-	a := g.drawGlyph(gtx, "trebleClef", image.Pt(g.leftOffset+10,
+	g.drawGlyph(gtx, "trebleClef", image.Pt(g.leftOffset+10,
 		(g.TopStaffLine+3)*g.staffLineHeight(gtx)+(g.StaffLineWeight/2)))
 	// Bass clef baseline should be aligned with F.
-	b := g.drawGlyph(gtx, "bassClef", image.Pt(g.leftOffset+10,
+	g.drawGlyph(gtx, "bassClef", image.Pt(g.leftOffset+10,
 		(g.BottomStaffLine-4)*g.staffLineHeight(gtx)+(g.StaffLineWeight/2)))
-	fmt.Println(a, b)
 }
 
 func (g *GrandStaff) drawGlyph(gtx C, name string, point image.Point) int {
@@ -113,7 +111,8 @@ func (g *GrandStaff) drawLeftBrace(gtx C) int {
 	scaledWidth := int(float64(dimensions.X) * float64(bottomOffset-topOffset) / float64(dimensions.Y))
 	dr := image.Rect(0, topOffset, scaledWidth, bottomOffset)
 
-	xdraw.NearestNeighbor.Scale(dst, dr, unmasked, mask.dr, draw.Over, nil)
+	// Bilinear is slow... but everything else looks terrible on high DPI.
+	xdraw.BiLinear.Scale(dst, dr, unmasked, mask.dr, draw.Over, nil)
 	paint.NewImageOp(dst).Add(gtx.Ops)
 	paint.PaintOp{}.Add(gtx.Ops)
 
