@@ -97,3 +97,7 @@ func (g *glyphStore) MustGetGlyphMask(name string) *glyphMask {
 	}
 	return glyph
 }
+
+func (g *glyphMask) Dimensions() image.Point {
+	return g.dr.Max.Sub(g.dr.Min)
+}

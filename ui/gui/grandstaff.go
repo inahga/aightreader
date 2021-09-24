@@ -17,7 +17,6 @@ const (
 )
 
 type (
-
 	// GrandStaff is a Gio widget that renders the grand staff.
 	GrandStaff struct {
 		StaffLineWeight int // Thickness in pixels of staff lines
@@ -92,12 +91,9 @@ func (g *GrandStaff) drawClefs(gtx C) int {
 	offset := g.leftOffset + g.leftOffset/2
 
 	// Treble clef baseline should be aligned with G.
-	t := g.drawGlyph(gtx, "trebleClef", image.Pt(offset,
-		(g.TopStaffLine+3)*g.staffLineHeight(gtx)+(g.StaffLineWeight/2)))
-
+	t := g.drawGlyph(gtx, "trebleClef", image.Pt(offset, g.yOffset(gtx, g.TopStaffLine+3)))
 	// Bass clef baseline should be aligned with F.
-	b := g.drawGlyph(gtx, "bassClef", image.Pt(offset,
-		(g.BottomStaffLine-4)*g.staffLineHeight(gtx)+(g.StaffLineWeight/2)))
+	b := g.drawGlyph(gtx, "bassClef", image.Pt(offset, g.yOffset(gtx, g.BottomStaffLine-4)))
 
 	if t > b {
 		return t
@@ -111,11 +107,24 @@ func (g *GrandStaff) drawTimeSignature(gtx C) int {
 	num := fmt.Sprintf("timeSignature%d", g.TimeSignature.BeatsPerBar)
 	denom := fmt.Sprintf("timeSignature%d", g.TimeSignature.BeatUnit)
 
-	g.drawGlyph(gtx, num, image.Pt(offset, g.yOffset(gtx, g.TopStaffLine+1)))
-	g.drawGlyph(gtx, denom, image.Pt(offset, g.yOffset(gtx, g.TopStaffLine+3)))
-	g.drawGlyph(gtx, num, image.Pt(offset, g.yOffset(gtx, g.BottomStaffLine-4)))
-	g.drawGlyph(gtx, denom, image.Pt(offset, g.yOffset(gtx, g.BottomStaffLine-2)))
-	return 0
+	// Center the smaller glyph relative to the bigger one.
+	var numOffset, denomOffset, ret int
+	numWidth := g.glyphStore.MustGetGlyphMask(num).Dimensions().X
+	denomWidth := g.glyphStore.MustGetGlyphMask(denom).Dimensions().X
+
+	if numWidth > denomWidth {
+		denomOffset = (numWidth - denomWidth) / 2
+		ret = numWidth
+	} else {
+		numOffset = (denomWidth - numWidth) / 2
+		ret = denomWidth
+	}
+
+	g.drawGlyph(gtx, num, image.Pt(offset+numOffset, g.yOffset(gtx, g.TopStaffLine+1)))
+	g.drawGlyph(gtx, denom, image.Pt(offset+denomOffset, g.yOffset(gtx, g.TopStaffLine+3)))
+	g.drawGlyph(gtx, num, image.Pt(offset+numOffset, g.yOffset(gtx, g.BottomStaffLine-4)))
+	g.drawGlyph(gtx, denom, image.Pt(offset+denomOffset, g.yOffset(gtx, g.BottomStaffLine-2)))
+	return offset + ret
 }
 
 // drawGlyph returns the width of the drawn glyph.
@@ -142,7 +151,7 @@ func (g *GrandStaff) drawLeftBrace(gtx C) int {
 	unmasked := image.NewRGBA(mask.dr)
 	draw.DrawMask(unmasked, mask.dr, image.Black, image.Point{}, mask.mask, mask.maskp, draw.Over)
 
-	dimensions := mask.dr.Max.Sub(mask.dr.Min)
+	dimensions := mask.Dimensions()
 	scaledWidth := int(float64(dimensions.X) * float64(bottomOffset-topOffset) / float64(dimensions.Y))
 	dr := image.Rect(0, topOffset, scaledWidth, bottomOffset)
 
