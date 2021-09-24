@@ -50,10 +50,9 @@ func (g *GrandStaff) Layout(gtx C) D {
 
 func (g *GrandStaff) drawStaffLines(gtx C) {
 	height, weight := g.staffLineHeight(gtx), g.StaffLineWeight
-	gap := g.numGapLedgerLines()
 	for _, lines := range []struct{ a, b int }{
-		{g.TopStaffLine, g.TopStaffLine + gap},
-		{g.BottomStaffLine - gap, g.BottomStaffLine},
+		{g.TopStaffLine, g.TopStaffLine + 5},
+		{g.BottomStaffLine - 5, g.BottomStaffLine},
 	} {
 		for i := lines.a; i < lines.b; i++ {
 			save := op.Save(gtx.Ops)
@@ -161,12 +160,6 @@ func (g *GrandStaff) drawLeftBrace(gtx C) int {
 	paint.PaintOp{}.Add(gtx.Ops)
 
 	return scaledWidth + bracePadding
-}
-
-// numGapLedgerLines is the number of ledger lines allowable between the top
-// and bottom staffs.
-func (g *GrandStaff) numGapLedgerLines() int {
-	return g.BottomStaffLine - g.TopStaffLine - 10
 }
 
 func (g *GrandStaff) staffLineHeight(gtx C) int {
