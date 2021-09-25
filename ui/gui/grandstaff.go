@@ -9,6 +9,8 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	xdraw "golang.org/x/image/draw"
+
+	T "github.com/inahga/aightreader/theory"
 )
 
 const (
@@ -21,9 +23,11 @@ type (
 	GrandStaff struct {
 		StaffLineWeight int // Thickness in pixels of staff lines
 		StaffLines      int // Number of staff and ledger lines to make space for.
-		TopStaffLine    int // Number of ledger lines before the top staff starts.
-		BottomStaffLine int // Number of ledger lines where the bottom staff ends.
+		TopStaffLine    int // Number of ledger lines before the top staff starts (i.e. F).
+		BottomStaffLine int // Number of staff and ledger lines where the bottom staff ends (i.e. G).
+
 		TimeSignature
+		T.Key
 
 		glyphStore      *glyphStore
 		largeGlyphStore *glyphStore
@@ -44,6 +48,7 @@ func (g *GrandStaff) Layout(gtx C) D {
 	g.leftOffset = g.drawLeftBrace(gtx)
 	g.drawStaffLines(gtx)
 	g.leftOffset = g.drawClefs(gtx)
+	g.leftOffset = g.drawKeySignature(gtx)
 	g.leftOffset = g.drawTimeSignature(gtx)
 	return D{Size: image.Point{X: gtx.Constraints.Max.X, Y: gtx.Constraints.Max.Y}}
 }
@@ -100,8 +105,33 @@ func (g *GrandStaff) drawClefs(gtx C) int {
 	return b + offset
 }
 
+func (g *GrandStaff) drawKeySignature(gtx C) int {
+	offset := g.leftOffset
+	sig := g.Key.Sig
+
+	var glyphName string
+	if len(sig) > 0 {
+		if sig[0].Accidental == T.Sharp {
+			glyphName = "sharpAccidental"
+		} else if sig[0].Accidental == T.Flat {
+			glyphName = "flatAccidental"
+		}
+	}
+
+	// Arbitrary padding, adjust as needed.
+	offset += g.leftOffset / 10
+	for _, sig := range g.Key.Sig {
+		// Arbitrary padding, adjust as needed.
+		offset += g.leftOffset / 15
+		g.drawGlyph(gtx, glyphName, image.Pt(offset, g.bassNoteYOffset(gtx, sig.BassNote())))
+		offset += g.drawGlyph(gtx, glyphName, image.Pt(offset, g.trebleNoteYOffset(gtx, sig.TrebleNote())))
+	}
+	return offset
+}
+
 func (g *GrandStaff) drawTimeSignature(gtx C) int {
-	offset := g.leftOffset + g.leftOffset/5
+	// Arbitrary padding, adjust as needed.
+	offset := g.leftOffset + g.leftOffset/10
 
 	num := fmt.Sprintf("timeSignature%d", g.TimeSignature.BeatsPerBar)
 	denom := fmt.Sprintf("timeSignature%d", g.TimeSignature.BeatUnit)
@@ -178,4 +208,19 @@ func (g *GrandStaff) bottomOffset(gtx C) int {
 
 func (g *GrandStaff) yOffset(gtx C, line int) int {
 	return line*g.staffLineHeight(gtx) + (g.StaffLineWeight / 2)
+}
+
+func (g *GrandStaff) bassNoteYOffset(gtx C, note T.Note) int {
+	// c0 is 9 ledger lines below bass clef staff
+	return g.noteYOffset(gtx, note, g.bottomOffset(gtx)+9*g.staffLineHeight(gtx))
+}
+
+func (g *GrandStaff) trebleNoteYOffset(gtx C, note T.Note) int {
+	// c0 is 19 lines and ledger lines below top line of treble clef staff
+	return g.noteYOffset(gtx, note, g.topOffset(gtx)+19*g.staffLineHeight(gtx))
+}
+
+func (g *GrandStaff) noteYOffset(gtx C, note T.Note, relative int) int {
+	dist := int(note.Octave)*7 + int(note.Class)
+	return relative - (dist * g.staffLineHeight(gtx) / 2)
 }

@@ -10,7 +10,7 @@ type (
 	Duration   float64
 	Accidental int
 	Mode       int
-	Class      string
+	Class      int
 
 	Tone struct {
 		Class
@@ -78,15 +78,32 @@ const (
 )
 
 const (
-	A Class = "A"
-	B Class = "B"
-	C Class = "C"
-	D Class = "D"
-	E Class = "E"
-	F Class = "F"
-	G Class = "G"
+	C Class = iota
+	D
+	E
+	F
+	G
+	A
+	B
 )
 
+var classes = []string{"C", "D", "E", "F", "G", "A", "B"}
+
+func (c Class) String() string {
+	return classes[c]
+}
+
 func (t Tone) String() string {
-	return string(t.Class) + t.Accidental.String()
+	return t.Class.String() + t.Accidental.String()
+}
+
+func N(c Class, a Accidental, o Octave, d Duration) Note {
+	return Note{
+		Tone: Tone{
+			Class:      c,
+			Accidental: a,
+		},
+		Octave:   o,
+		Duration: d,
+	}
 }

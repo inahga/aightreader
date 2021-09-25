@@ -8,6 +8,8 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
+
+	T "github.com/inahga/aightreader/theory"
 )
 
 type (
@@ -42,6 +44,7 @@ func drawWindow(w *app.Window) error {
 		TopStaffLine:    9,
 		BottomStaffLine: 24,
 		TimeSignature:   TimeSignature{3, 4},
+		Key:             T.MustGetKeyByClass(T.G, T.Natural, T.Minor),
 	}
 
 	for e := range w.Events() {
