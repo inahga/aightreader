@@ -43,7 +43,7 @@ func drawWindow(w *app.Window) error {
 		StaffLines:      31,
 		TopStaffLine:    9,
 		BottomStaffLine: 24,
-		TimeSignature:   T.TimeSignature{3, 4},
+		Time:            T.Time{3, 4},
 		Key:             T.MustGetKeyByClass(T.G, T.Natural, T.Minor),
 	}
 

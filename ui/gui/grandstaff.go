@@ -26,16 +26,12 @@ type (
 		TopStaffLine    int // Number of ledger lines before the top staff starts (i.e. F).
 		BottomStaffLine int // Number of staff and ledger lines where the bottom staff ends (i.e. G).
 
-		T.TimeSignature
+		T.Time
 		T.Key
 
 		glyphStore      *glyphStore
 		largeGlyphStore *glyphStore
 		leftOffset      int
-	}
-
-	TimeSignature struct {
-		BeatsPerBar, BeatUnit int
 	}
 )
 
@@ -133,8 +129,8 @@ func (g *GrandStaff) drawTimeSignature(gtx C) int {
 	// Arbitrary padding, adjust as needed.
 	offset := g.leftOffset + g.leftOffset/10
 
-	num := fmt.Sprintf("timeSignature%d", g.TimeSignature.BeatsPerBar)
-	denom := fmt.Sprintf("timeSignature%d", g.TimeSignature.BeatUnit)
+	num := fmt.Sprintf("timeSignature%d", g.Time.BeatsPerBar)
+	denom := fmt.Sprintf("timeSignature%d", g.Time.BeatUnit)
 
 	// Center the smaller glyph relative to the bigger one.
 	var numOffset, denomOffset, ret int

@@ -36,7 +36,7 @@ type (
 		Sig   []KeySignature
 	}
 
-	TimeSignature struct {
+	Time struct {
 		BeatsPerBar, BeatUnit int
 	}
 )
