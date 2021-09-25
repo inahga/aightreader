@@ -1,8 +1,9 @@
 // Package theory implements music theory. There is also support for associating
-// MIDI numbers with music theory.
+// MIDI numbers with music theory. It vaguely corresponds to the MusicXML data
+// structures.
 //
 // Note that this is inahga's(tm) music theory. My understanding of actual music
-// theory is pretty bad :)
+// theory is pretty bad :).
 package theory
 
 type (
@@ -11,6 +12,7 @@ type (
 	Accidental int
 	Mode       int
 	Class      int
+	Clef       int
 
 	Tone struct {
 		Class
@@ -39,6 +41,15 @@ type (
 	Time struct {
 		BeatsPerBar, BeatUnit int
 	}
+
+	Measure []Note
+
+	Part struct {
+		Clef
+		Time
+		Key
+		Measures []Measure
+	}
 )
 
 const (
@@ -51,9 +62,8 @@ func (m Mode) String() string {
 		return "Major"
 	} else if m == Minor {
 		return "Minor"
-	} else {
-		return ""
 	}
+	return ""
 }
 
 const (
@@ -67,9 +77,8 @@ func (a Accidental) String() string {
 		return "b"
 	} else if a == Sharp {
 		return "#"
-	} else {
-		return ""
 	}
+	return ""
 }
 
 const (
@@ -91,6 +100,11 @@ const (
 	B
 )
 
+const (
+	Treble Clef = iota
+	Bass
+)
+
 var classes = []string{"C", "D", "E", "F", "G", "A", "B"}
 
 func (c Class) String() string {
@@ -99,6 +113,15 @@ func (c Class) String() string {
 
 func (t Tone) String() string {
 	return t.Class.String() + t.Accidental.String()
+}
+
+func (c Clef) String() string {
+	if c == Treble {
+		return "Treble"
+	} else if c == Bass {
+		return "Bass"
+	}
+	return ""
 }
 
 func N(c Class, a Accidental, o Octave, d Duration) Note {
