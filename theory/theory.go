@@ -24,7 +24,7 @@ type (
 		Duration
 	}
 
-	Signature struct {
+	KeySignature struct {
 		Tone
 		TrebleOctave Octave // Helps render the time signature for treble clef
 		BassOctave   Octave // Helps render the time signature for bass clef
@@ -33,7 +33,11 @@ type (
 	Key struct {
 		Major Tone
 		Minor Tone
-		Sig   []Signature
+		Sig   []KeySignature
+	}
+
+	TimeSignature struct {
+		BeatsPerBar, BeatUnit int
 	}
 )
 

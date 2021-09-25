@@ -26,7 +26,7 @@ type (
 		TopStaffLine    int // Number of ledger lines before the top staff starts (i.e. F).
 		BottomStaffLine int // Number of staff and ledger lines where the bottom staff ends (i.e. G).
 
-		TimeSignature
+		T.TimeSignature
 		T.Key
 
 		glyphStore      *glyphStore

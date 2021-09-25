@@ -5,19 +5,19 @@ import (
 )
 
 var (
-	sharpOrder = []Signature{
+	sharpOrder = []KeySignature{
 		{Tone{F, Sharp}, 5, 3}, {Tone{C, Sharp}, 5, 3}, {Tone{G, Sharp}, 5, 3},
 		{Tone{D, Sharp}, 5, 3}, {Tone{A, Sharp}, 4, 2}, {Tone{E, Sharp}, 5, 3},
 		{Tone{B, Sharp}, 4, 2},
 	}
-	flatOrder = []Signature{
+	flatOrder = []KeySignature{
 		{Tone{B, Flat}, 4, 2}, {Tone{E, Flat}, 5, 3}, {Tone{A, Flat}, 4, 2},
 		{Tone{D, Flat}, 5, 3}, {Tone{G, Flat}, 4, 2}, {Tone{C, Flat}, 5, 3},
 		{Tone{F, Flat}, 4, 2},
 	}
 
 	keys = []Key{
-		{Tone{C, Natural}, Tone{A, Natural}, []Signature{}},
+		{Tone{C, Natural}, Tone{A, Natural}, []KeySignature{}},
 
 		// Clockwise circle of fifths.
 		{Tone{G, Natural}, Tone{E, Natural}, sharpOrder[0:1]},
@@ -59,12 +59,12 @@ func MustGetKeyByClass(class Class, adjustment Accidental, mode Mode) Key {
 
 // BassNote returns a note indicating the octave at which the signature should
 // be placed when rendering bass clef.
-func (s Signature) BassNote() Note {
+func (s KeySignature) BassNote() Note {
 	return N(s.Class, s.Accidental, s.BassOctave, 0)
 }
 
 // BassNote returns a note indicating the octave at which the signature should
 // be placed when rendering treble clef.
-func (s Signature) TrebleNote() Note {
+func (s KeySignature) TrebleNote() Note {
 	return N(s.Class, s.Accidental, s.TrebleOctave, 0)
 }
