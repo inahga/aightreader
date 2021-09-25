@@ -20,22 +20,22 @@ var (
 		{Tone{C, Natural}, Tone{A, Natural}, []Signature{}},
 
 		// Clockwise circle of fifths.
-		{Tone{G, Natural}, Tone{E, Natural}, sharpOrder[0:0]},
-		{Tone{D, Natural}, Tone{B, Natural}, sharpOrder[0:1]},
-		{Tone{A, Natural}, Tone{F, Sharp}, sharpOrder[0:2]},
-		{Tone{E, Natural}, Tone{C, Sharp}, sharpOrder[0:3]},
-		{Tone{B, Natural}, Tone{G, Sharp}, sharpOrder[0:4]},
-		{Tone{F, Sharp}, Tone{D, Sharp}, sharpOrder[0:5]},
-		{Tone{C, Sharp}, Tone{A, Sharp}, sharpOrder[0:6]},
+		{Tone{G, Natural}, Tone{E, Natural}, sharpOrder[0:1]},
+		{Tone{D, Natural}, Tone{B, Natural}, sharpOrder[0:2]},
+		{Tone{A, Natural}, Tone{F, Sharp}, sharpOrder[0:3]},
+		{Tone{E, Natural}, Tone{C, Sharp}, sharpOrder[0:4]},
+		{Tone{B, Natural}, Tone{G, Sharp}, sharpOrder[0:5]},
+		{Tone{F, Sharp}, Tone{D, Sharp}, sharpOrder[0:6]},
+		{Tone{C, Sharp}, Tone{A, Sharp}, sharpOrder[0:7]},
 
 		// Counterclockwise circle of fifths.
-		{Tone{C, Flat}, Tone{A, Flat}, flatOrder[0:6]},
-		{Tone{G, Flat}, Tone{E, Flat}, flatOrder[0:5]},
-		{Tone{D, Flat}, Tone{B, Flat}, flatOrder[0:4]},
-		{Tone{A, Flat}, Tone{F, Natural}, flatOrder[0:3]},
-		{Tone{E, Flat}, Tone{C, Natural}, flatOrder[0:2]},
-		{Tone{B, Flat}, Tone{G, Natural}, flatOrder[0:1]},
-		{Tone{F, Natural}, Tone{D, Natural}, flatOrder[0:0]},
+		{Tone{C, Flat}, Tone{A, Flat}, flatOrder[0:7]},
+		{Tone{G, Flat}, Tone{E, Flat}, flatOrder[0:6]},
+		{Tone{D, Flat}, Tone{B, Flat}, flatOrder[0:5]},
+		{Tone{A, Flat}, Tone{F, Natural}, flatOrder[0:4]},
+		{Tone{E, Flat}, Tone{C, Natural}, flatOrder[0:3]},
+		{Tone{B, Flat}, Tone{G, Natural}, flatOrder[0:2]},
+		{Tone{F, Natural}, Tone{D, Natural}, flatOrder[0:1]},
 	}
 )
 
@@ -55,4 +55,16 @@ func MustGetKeyByClass(class Class, adjustment Accidental, mode Mode) Key {
 		panic(err)
 	}
 	return k
+}
+
+// BassNote returns a note indicating the octave at which the signature should
+// be placed when rendering bass clef.
+func (s Signature) BassNote() Note {
+	return N(s.Class, s.Accidental, s.BassOctave, 0)
+}
+
+// BassNote returns a note indicating the octave at which the signature should
+// be placed when rendering treble clef.
+func (s Signature) TrebleNote() Note {
+	return N(s.Class, s.Accidental, s.TrebleOctave, 0)
 }
